@@ -30,7 +30,7 @@ The aim of this tool is to help the user spot words/tokens Whisper is less confi
 ## Running it
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/helene-sdl/Confidence_visualisation
 cd Confidence_visualisation
 pip install -r requirements.txt
 streamlit run app.py
