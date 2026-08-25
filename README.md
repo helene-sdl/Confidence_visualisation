@@ -17,13 +17,13 @@ The aim of this tool is to help the user spot words/tokens Whisper is less confi
   - *Relative*: the word threshold is a percentage of that word's own sentence average; the token threshold is a percentage of that word's own confidence.
 
 **CSV columns**:
-    - `sentence_id`: which sentence (1-indexed) a word belongs to \n
-    - `word` / `sentence_confidence` / `word_confidence`: the text and confidence values \n
-    - `word_threshold` / `word_flag`: the word-level cutoff used and whether it was crossed \n
-    - `token_threshold` / `token_flag`: same, at the token level \n
-    - `lowest_confidence_token`: the confidence of the  worst token in that word \n
-    - `tokens`: the word's individual sub-tokens, as split by the model \n
-    - `time_start` / `time_end`: approximate timing, useful for cutting out words/sentences eventually \n
+  - `sentence_id`: which sentence (1-indexed) a word belongs to 
+  - `word` / `sentence_confidence` / `word_confidence`: the text and confidence values 
+  - `word_threshold` / `word_flag`: the word-level cutoff used and whether it was crossed 
+  - `token_threshold` / `token_flag`: same, at the token level 
+  - `lowest_confidence_token`: the confidence of the  worst token in that word 
+  - `tokens`: the word's individual sub-tokens, as split by the model 
+  - `time_start` / `time_end`: approximate timing, useful for cutting out words/sentences eventually 
 
 **Limitations**: sentence splitting is based on simple punctuation detection and may therefore not accomodate abbreviations or missing punctuations well
 
