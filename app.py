@@ -381,7 +381,7 @@ with st.expander("About this tool"):
     st.markdown("""
     The aim of this tool is to help the user spot words/tokens Whisper is less confident about in its transcription. To this end, two thresholds can be set & adjusted. 
 
-    **Model**: openai/whisper-large-v3 (via Hugging Face Transformers) \n
+    **Model**: openai/whisper-small (via Hugging Face Transformers) \n
     **Confidence**: How certain the model is about each word and/or token. A token is a smaller piece of a word, produced by the model. \n 
     - Word-level confidence: How certain the model is about each word? \n
     - Token-level confidence: Was there a moment inside a particular word, where the model was really unsure (even if it was confident about the word as a whole)? \n
