@@ -50,7 +50,11 @@ st.markdown(
 def load_model():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     processor = WhisperProcessor.from_pretrained("openai/whisper-large-v3")
-    model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-large-v3").to(device)
+    model = WhisperForConditionalGeneration.from_pretrained(
+        "openai/whisper-large-v3",
+        torch_dtype=torch.float32,
+        low_cpu_mem_usage=True,
+    ).to(device)
     model.eval()
     return processor, model, device
 
