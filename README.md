@@ -30,14 +30,24 @@ The aim of this tool is to help the user spot words/tokens Whisper is less confi
 ## Running it
 
 ```bash
+git clone <repo-url>
+cd Confidence_visualisation
+pip install -r requirements.txt
 streamlit run app.py
 ```
 
-Requires `torch`, `transformers`, `streamlit`, `librosa`, `soundfile`, and `pandas`.
-GPU is used automatically if available, otherwise falls back to CPU.
+GPU is used automatically if available when running locally, otherwise falls back to CPU.
+
 
 ## Files
 
 - `app.py`: the Streamlit UI: upload, settings, thresholds, display, export
 - `confidence_logic.py`: the underlying logic (transcription, confidence computation,
   sentence splitting, coloring, CSV export), no Streamlit dependency 
+
+## Live Demo
+https://confidencevisualisation-h5sjpgtcvwkhvckcwrhq8r.streamlit.app/
+
+
+Note: the deployed version uses `openai/whisper-small` rather than `large-v3`, due to
+memory constraints on Streamlit Community Cloud's free tier, which is why transcription accuracy is expected to be notably lower. For full use, run locally with `large-v3` (see "Running it" above).
