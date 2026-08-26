@@ -85,7 +85,12 @@ def transcribe_with_token_data(audio_path, processor, model, device, language="d
             continue
 
         chunk_start_time = chunk_start_sample / sr
-        inputs = processor(chunk_audio, sampling_rate=sr, return_tensors="pt").to(device)
+        _, speech_interval = librosa.effects.trim(chunk_audio, top_db=30)
+        speech_start_offset = speech_interval[0] / sr
+        speech_end_offset = speech_interval[1] / sr
+        effective_chunk_start = chunk_start_time + speech_start_offset
+        effective_duration = speech_end_offset - speech_start_offset
+        inputs = processor(chunk_audio, sampling_rate=sr, return_tensors="pt", return_attention_mask=True).to(device)
 
         with torch.no_grad():
             out = model.generate(
@@ -94,6 +99,7 @@ def transcribe_with_token_data(audio_path, processor, model, device, language="d
                 task="transcribe",
                 output_scores=True,
                 return_dict_in_generate=True,
+                attention_mask=inputs["attention_mask"],
                 temperature=temperature,
                 do_sample=(temperature > 0.0),
             )
@@ -103,8 +109,7 @@ def transcribe_with_token_data(audio_path, processor, model, device, language="d
         aligned_token_ids = token_ids[offset:]
         token_records = _extract_token_records(processor, out, aligned_token_ids)
 
-        chunk_duration = len(chunk_audio) / sr if sr > 0 else chunk_length_s
-        words.extend(_build_word_chunks(token_records, chunk_start_time, chunk_duration))
+        words.extend(_build_word_chunks(token_records, effective_chunk_start, effective_duration))
 
     hypothesis = " ".join(word["text"].strip() for word in words if word["text"].strip())
     return hypothesis, words, full_audio, sr
