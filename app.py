@@ -13,7 +13,6 @@ from confidence_logic import (
     apply_flags,
     render_sentence_html,
     build_export_rows,
-    get_audio_clip_bytes,
     WORD_COLORS,
     TOKEN_COLORS,
 )
@@ -22,7 +21,6 @@ st.set_page_config(page_title="ASR Confidence Review Tool", layout="wide")
 
 MAX_FILE_SIZE_MB = 200
 MAX_DURATION_S = 600  # 10 minutes
-MIN_SENTENCES_FOR_PLAYBACK = 2
 MIN_SENTENCES_FOR_EXPANSION = 5
 
 # Streamlit does not currently expose a padding argument for bordered
@@ -262,85 +260,31 @@ if uploaded_file is not None:
             )
 
     with st.container(border=True):
-            st.markdown("**Whisper Transcription:**")
-            st.caption(
-                f"{len(sentences)} sentence(s) detected · "
-                f"word threshold {word_pct}% ({word_mode}) · token threshold {token_pct}% ({token_mode})"
-            )
+        st.markdown("**Whisper Transcription:**")
+        st.caption(
+            f"{len(sentences)} sentence(s) detected · "
+            f"word threshold {word_pct}% ({word_mode}) · token threshold {token_pct}% ({token_mode})"
+        )
 
-            can_play_sentence = len(sentences) >= MIN_SENTENCES_FOR_PLAYBACK
-            can_expand_transcript = len(sentences) >= MIN_SENTENCES_FOR_EXPANSION
-            if can_play_sentence and can_expand_transcript:
-                playback_col, expand_col = st.columns(2)
-            elif can_play_sentence or can_expand_transcript:
-                playback_col = expand_col = st.container()
-            else:
-                playback_col = expand_col = None
+        can_expand_transcript = len(sentences) >= MIN_SENTENCES_FOR_EXPANSION
 
-            if can_play_sentence:
-                with playback_col:
-                    allow_sentence_playback = st.checkbox(
-                        "Allow replay of individual sentences",
-                        value=True,
-                    )
-            else:
-                allow_sentence_playback = False
+        if can_expand_transcript:
+            expand_transcript = st.checkbox("Expand transcript view", value=False)
+        else:
+            expand_transcript = False
 
-            if can_expand_transcript:
-                with expand_col:
-                    expand_transcript = st.checkbox("Expand transcript view", value=False)
-            else:
-                expand_transcript = False
-
-            transcript_height = 900 if expand_transcript else 200
-            with st.container(height=transcript_height):
-                for sent in sentences:
-                    sentence_col, play_col = st.columns([0.94, 0.06])
-
-                    with sentence_col:
-                        st.markdown(
-                            render_sentence_html(
-                                [sent],
-                                show_word=show_word,
-                                show_token=show_token,
-                            ),
-                            unsafe_allow_html=True,
-                        )
-
-                    with play_col:
-                        if allow_sentence_playback:
-                            st.button(
-                                "▶",
-                                key=f"play_sentence_{sent['sentence_id']}",
-                                help=f"Play sentence {sent['sentence_id']}",
-                                on_click=lambda sentence_id=sent["sentence_id"]:
-                                    st.session_state.update(
-                                        selected_sentence_id=sentence_id
-                                    ),
-                            )
-
-            if allow_sentence_playback:
-                selected_sentence_id = st.session_state.get("selected_sentence_id")
-                selected_sentence = next(
-                    (
-                        sent for sent in sentences
-                        if sent["sentence_id"] == selected_sentence_id
+        transcript_height = 900 if expand_transcript else 200
+        with st.container(height=transcript_height):
+            for sent in sentences:
+                st.markdown(
+                    render_sentence_html(
+                        [sent],
+                        show_word=show_word,
+                        show_token=show_token,
                     ),
-                    None,
+                    unsafe_allow_html=True,
                 )
 
-                if selected_sentence is not None:
-                    sentence_clip = get_audio_clip_bytes(
-                        full_audio,
-                        sr,
-                        selected_sentence["start"],
-                        selected_sentence["end"],
-                    )
-
-
-   
-    
-                    st.audio(sentence_clip, format="audio/wav")
 
     with st.expander("Word/Token scores"):
         rows_for_table = []
@@ -357,8 +301,6 @@ if uploaded_file is not None:
                     "token_flag": w["token_flag"],
                     "lowest_confidence_token": round(w["confidence_token"], 4),
                     "tokens": " | ".join(w["token_texts"]),
-                    "time_start": w["time_start"],
-                    "time_end": w["time_end"],
                 }
                 rows_for_table.append(row)
         st.dataframe(pd.DataFrame(rows_for_table), hide_index=True)
@@ -402,7 +344,6 @@ with st.expander("About this tool"):
     - `token_threshold` / `token_flag`: same, at the token level
     - `lowest_confidence_token`: the confidence of the worst token in that word
     - `tokens`: the word's individual sub-tokens, as split by the model
-    - `time_start` / `time_end`: approximate timing, useful for cutting out words/sentences eventually 
 
     **Limitations**: sentence splitting is based on simple punctuation detection and may therefore not accommodate abbreviations or missing punctuation well
 

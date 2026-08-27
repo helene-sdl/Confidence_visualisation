@@ -145,8 +145,6 @@ def compute_raw_word_stats(sent_words):
                 "confidence_token": min(probs),
                 "token_texts": [t.strip() for t in word["token_texts"]],
                 "token_probs": probs,
-                "time_start": round(word["start"], 4) if word.get("start") is not None else None,
-                "time_end": round(word["end"], 4) if word.get("end") is not None else None,
             }
         )
     return stats
@@ -172,8 +170,6 @@ def build_sentences(words):
                 "sentence_id": sent_id + 1,
                 "text": " ".join(word["word"] for word in word_stats),
                 "confidence_avg": round(confidence_avg, 4),
-                "start": word_stats[0]["time_start"] if word_stats else None,
-                "end": word_stats[-1]["time_end"] if word_stats else None,
                 "words": word_stats,
             }
         )
@@ -246,16 +242,6 @@ def render_sentence_html(sentences, show_word=True, show_token=True):
     return "".join(blocks)
 
 
-def get_audio_clip_bytes(full_audio, sr, start, end):
-    start_sample = int(start * sr) if start is not None else 0
-    end_sample = int(end * sr) if end is not None else len(full_audio)
-    clip = full_audio[start_sample:end_sample]
-
-    buffer = io.BytesIO()
-    sf.write(buffer, clip, sr, format="WAV")
-    buffer.seek(0)
-    return buffer
-
 
 def build_export_rows(filename, sentences, word_mode, word_pct, token_mode, token_pct,
                        show_word=True, show_token=True):
@@ -284,8 +270,7 @@ def build_export_rows(filename, sentences, word_mode, word_pct, token_mode, toke
                 row["lowest_confidence_token"] = round(word["confidence_token"], 4)
                 row["tokens"] = " | ".join(word["token_texts"])
 
-            row["time_start"] = word["time_start"]
-            row["time_end"] = word["time_end"]
+   
             rows.append(row)
 
     return rows

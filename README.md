@@ -22,7 +22,6 @@ The aim of this tool is to help the user spot words/tokens Whisper is less confi
   - `token_threshold` / `token_flag`: same, at the token level 
   - `lowest_confidence_token`: the confidence of the worst token in that word 
   - `tokens`: the word's individual sub-tokens, as split by the model 
-  - `time_start` / `time_end`: approximate timing, useful for cutting out words/sentences eventually 
 
 **Limitations**: sentence splitting is based on simple punctuation detection and may therefore not accommodate abbreviations or missing punctuation well
 
